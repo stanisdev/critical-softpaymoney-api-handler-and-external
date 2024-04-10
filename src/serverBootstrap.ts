@@ -10,7 +10,6 @@ import config from './common/config';
 import { LogLevel, LoggerService, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './modules/app.module';
 import { typeOrmDataSource } from 'src/database/data-source';
-import { GazpromCompletionWebhook } from './common/providers/webhook/gazprom/gazprom-completion.webhook';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { GeneralUtil } from './common/utils/general.util';
 import { MongoClient } from './common/providers/mongoClient';
@@ -44,7 +43,7 @@ export class ServerBootstrap {
         await this.connectPostgres();
         await this.connectMongo();
 
-        GazpromCompletionWebhook.loadCertificates();
+        // GazpromCompletionWebhook.loadCertificates(); // @todo: Refactor this
 
         /**
          * Build application instance
@@ -69,13 +68,7 @@ export class ServerBootstrap {
      * Define server type and port
      */
     private async defineServerTypeAndPort(): Promise<void> {
-        /**
-         * Server started as 'Primary'
-         */
-        if (config.server.isPrimary()) {
-            this.port = config.server.port.primary;
-            this.serverType = ServerType.Primary;
-        } else if (config.server.isExternalInteraction()) {
+        if (config.server.isExternalInteraction()) {
             /**
              * Server started as 'External interaction'
              */

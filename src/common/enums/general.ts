@@ -65,7 +65,6 @@ export enum BalanceUpdateOperation {
 }
 
 export enum ServerType {
-    Primary = 'PRIMARY',
     ExternalInteraction = 'EXTERNAL_INTERACTION',
     Handler = 'HANDLER',
 }

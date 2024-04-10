@@ -34,12 +34,8 @@ export default {
     },
     server: {
         port: {
-            primary: +env.PRIMARY_SERVER_PORT,
             handler: +env.HANDLER_SERVER_PORT,
             externalInteraction: +env.EXTERNAL_INTERACTION_SERVER_PORT,
-        },
-        isPrimary() {
-            return env.SERVER_TYPE === 'primary';
         },
         isHandler() {
             return env.SERVER_TYPE === 'handler';

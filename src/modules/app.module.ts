@@ -1,6 +1,5 @@
 import { APP_GUARD } from '@nestjs/core';
 import { Module, OnModuleDestroy } from '@nestjs/common';
-import { PrimaryModule } from './primary/primary.module';
 import { typeOrmDataSource } from 'src/database/data-source';
 import { HandlerModule } from './handler/handler.module';
 import { ExternalInteractionModule } from './external-interaction/external-interaction.module';
@@ -45,17 +44,12 @@ export class AppModule implements OnModuleDestroy {
      */
     static getModules() {
         const serveModuleParam = process.env.SERVER_TYPE;
-        const modules: (typeof PrimaryModule)[] = [];
+        const modules: (typeof HandlerModule)[] = [];
 
         /**
-         * Primary server
+         * Handler server
          */
-        if (serveModuleParam === 'primary') {
-            modules.push(PrimaryModule);
-            /**
-             * Handler server
-             */
-        } else if (serveModuleParam === 'handler') {
+        if (serveModuleParam === 'handler') {
             modules.push(HandlerModule);
             /**
              * External interactio server
@@ -66,11 +60,7 @@ export class AppModule implements OnModuleDestroy {
              * All servers at once
              */
         } else if (serveModuleParam === 'all') {
-            modules.push(
-                PrimaryModule,
-                HandlerModule,
-                ExternalInteractionModule,
-            );
+            modules.push(HandlerModule, ExternalInteractionModule);
         } else {
             throw new Error(
                 `Server started with lack of 'SERVER_TYPE' variable`,
