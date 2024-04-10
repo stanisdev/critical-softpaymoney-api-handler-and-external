@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ExternalInteractionService } from './external-interaction.service';
-import { SuccessfulResponse } from 'src/common/types/general';
+import { ExternalSuccessfulResponse } from 'src/common/types/general';
 import { EntryPointDto } from './dto/entry-point.dto';
 
 @Controller('/external-interaction')
@@ -11,7 +11,9 @@ export class ExternalInteractionController {
 
     @Post('/')
     @HttpCode(HttpStatus.OK)
-    async entryPoint(@Body() dto: EntryPointDto): Promise<SuccessfulResponse> {
+    async entryPoint(
+        @Body() dto: EntryPointDto,
+    ): Promise<ExternalSuccessfulResponse> {
         await this.externalInteractionService.execute(dto);
         return {
             ok: true,

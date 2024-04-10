@@ -28,6 +28,7 @@ import config from 'src/common/config';
  * Class to handle Gazprom bank completion webhook
  */
 export class GazpromCompletionWebhook {
+    // @todo: implement interface 'WebhookFrame'
     private static regularLogger = RegularLogger.getInstance();
     private static databaseLogger = DatabaseLogger.getInstance();
     private static certificates = {

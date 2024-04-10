@@ -1,11 +1,5 @@
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
-    BadRequestException,
-    Injectable,
-    InternalServerErrorException,
-} from '@nestjs/common';
-import DatabaseLogger from 'src/common/providers/logger/database.logger';
-import {
-    DatabaseLogType,
     HandlerDestination,
     IncomingRequestStatus,
     PaymentSystem,
@@ -15,17 +9,18 @@ import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.ent
 import { incomingRequestRepository } from 'src/database/repositories';
 import { HandlerHelper } from './handler.helper';
 import { GazpromPreparationWebhook } from 'src/common/providers/webhook/gazprom/gazprom-preparation.webhook';
+import { ExecutionFinalResult } from 'src/common/types/general';
 
 @Injectable()
 export class HandlerService {
-    private databaseLogger = DatabaseLogger.getInstance();
-
     constructor(private readonly helper: HandlerHelper) {}
 
     /**
      * Process incoming request
      */
-    async process(incomingRequestId: number): Promise<void | never> {
+    async process(
+        incomingRequestId: number,
+    ): Promise<ExecutionFinalResult | never> {
         const incomingRequest = await incomingRequestRepository
             .createQueryBuilder()
             .where('id = :id', { id: incomingRequestId })
@@ -56,17 +51,8 @@ export class HandlerService {
          * Incoming request already processed or failed
          */
         if (incomingRequest.status !== IncomingRequestStatus.Received) {
-            const logPayload = {
-                id: incomingRequestId,
-                status: incomingRequest.status,
-                paymentSystem: incomingRequest.paymentSystem,
-            };
-            await this.databaseLogger.write(
-                DatabaseLogType.IncomingRequestProcessedOrFailed,
-                logPayload,
-            );
-            throw new BadRequestException(
-                `Incoming request id='${incomingRequestId}' is already processed or failed`,
+            await this.helper.claimUnacceptableIncomingRequestStatus(
+                incomingRequest,
             );
         }
 
@@ -80,11 +66,12 @@ export class HandlerService {
              * Completion handler destination
              */
             if (handlerDestination === HandlerDestination.Completion) {
-                const completionWebhook = new GazpromCompletionWebhook(
+                const gazpromCompletionWebhook = new GazpromCompletionWebhook(
                     incomingRequest,
                 );
-                await completionWebhook.execute();
-                const executionResult = completionWebhook.getExecutionResult();
+                await gazpromCompletionWebhook.execute();
+                const executionResult =
+                    gazpromCompletionWebhook.getExecutionResult();
 
                 if (
                     executionResult instanceof Object &&
@@ -118,18 +105,20 @@ export class HandlerService {
                          */
                     }
                 }
-            } else if (handlerDestination === HandlerDestination.Preparation) {
                 /**
                  * Preparation handler destination
                  */
-                const preparationWebhook = new GazpromPreparationWebhook(
+            } else if (handlerDestination === HandlerDestination.Preparation) {
+                const gazpromPreparationWebhook = new GazpromPreparationWebhook(
                     incomingRequest,
                 );
-                await preparationWebhook.execute();
-            } else {
+                await gazpromPreparationWebhook.execute();
+                return gazpromPreparationWebhook.getFinalResult();
+
                 /**
                  * Wrong handler destination
                  */
+            } else {
                 throw new InternalServerErrorException(
                     'Unknown handler destination',
                 );

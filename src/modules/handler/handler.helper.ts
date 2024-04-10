@@ -84,4 +84,24 @@ export class HandlerHelper {
             `Incoming request id='${incomingRequestId}' is not found`,
         );
     }
+
+    /**
+     * Unacceptable status of incoming request, throw an error
+     */
+    async claimUnacceptableIncomingRequestStatus(
+        incomingRequest: IncomingRequestEntity,
+    ): Promise<void> {
+        const logPayload = {
+            id: incomingRequest.id,
+            status: incomingRequest.status,
+            paymentSystem: incomingRequest.paymentSystem,
+        };
+        await HandlerHelper.databaseLogger.write(
+            DatabaseLogType.IncomingRequestProcessedOrFailed,
+            logPayload,
+        );
+        throw new BadRequestException(
+            `Incoming request id='${incomingRequest.id}' is already processed or failed`,
+        );
+    }
 }

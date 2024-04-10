@@ -1,18 +1,17 @@
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
 import DatabaseLogger from '../../logger/database.logger';
 import { MongoClient } from '../../mongoClient';
-import { Dictionary } from 'src/common/types/general';
-import {
-    BadRequestException,
-    InternalServerErrorException,
-} from '@nestjs/common';
+import { Dictionary, ExecutionFinalResult } from 'src/common/types/general';
+import { BadRequestException } from '@nestjs/common';
 import { GazpromDataSource } from './gazprom.data-source';
-import { GazpromPaymentStatus } from 'src/common/enums/general';
+import { ContentType, GazpromPaymentStatus } from 'src/common/enums/general';
+import { WebhookFrame } from 'src/common/interfaces/general';
 
-export class GazpromPreparationWebhook {
+export class GazpromPreparationWebhook implements WebhookFrame {
     private static databaseLogger = DatabaseLogger.getInstance();
     private mongoClient = MongoClient.getInstance().database;
     private dataSource: GazpromDataSource;
+    private finalResult: ExecutionFinalResult;
 
     constructor(private readonly incomingRequest: IncomingRequestEntity) {
         this.dataSource = new GazpromDataSource(incomingRequest);
@@ -33,17 +32,22 @@ export class GazpromPreparationWebhook {
         const order = await this.dataSource.findOrderByPaymentId(
             <string>orderPaymentId,
         );
+        const product = await this.dataSource.findProductById(order.product);
+        console.log(product);
 
         let payloadData: Dictionary;
         if (order instanceof Object) {
             payloadData = {
                 code: 1,
                 desc: 'Payment accepted',
-                longDesc: `Оплата продукта: "${order.product.name}"`, // @todo: fix this
+                longDesc: `Оплата продукта: "${product.name}"`,
                 amount: Number(order.payment.amount),
                 currency: 643, // Трехзначный цифровой код валюты (ISO 4217)
                 exponent: 2, // Экспонента валюты платежа (ISO 4217)
-                trxId: 'oldTrx ??????', // @todo: fix this also
+                /**
+                 * @todo: fix the line below
+                 */
+                trxId: 'oldTrx ??????',
             };
         } else {
             payloadData = {
@@ -93,9 +97,19 @@ export class GazpromPreparationWebhook {
                 });
             }
         }
-        const finalResult = [
-            { 'payment-avail-response': responseData }, // Стр. 50 из 64 - Документация (v1_32)
-        ];
+        this.finalResult = {
+            payload: [
+                { 'payment-avail-response': responseData }, // Стр. 50 из 64 - Документация (v1_32)
+            ],
+            contentType: ContentType.Xml,
+        };
+    }
+
+    /**
+     * Get final result of execution
+     */
+    getFinalResult(): ExecutionFinalResult {
+        return this.finalResult;
     }
 
     /**
