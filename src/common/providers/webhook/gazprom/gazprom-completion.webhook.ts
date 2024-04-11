@@ -358,21 +358,4 @@ export class GazpromCompletionWebhook implements WebhookFrame {
             contentType: ContentType.Xml,
         };
     }
-
-    /**
-     * @todo: REMOVE THIS METHOD
-     * Get successful response object
-     */
-    static getSuccessfulResponse() {
-        return {
-            payload: [
-                {
-                    'register-payment-response': [
-                        { result: [{ code: 1 }, { desc: 'accept payment' }] },
-                    ],
-                },
-            ],
-            contentType: ContentType.Xml,
-        };
-    }
 }
