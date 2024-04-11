@@ -56,23 +56,6 @@ export class GazpromCompletionHelper {
         return MathUtil.ceil10(amount - (additionalCommission || 0), -2);
     }
 
-    /**
-     * Parse payload of incoming request to a plain object
-     */
-    parseIncomingRequest(): Dictionary {
-        const { incomingRequest } = this;
-        let payload: Dictionary;
-
-        try {
-            payload = JSON.parse(incomingRequest.payload);
-        } catch {
-            throw new InternalServerErrorException(
-                `Payload of incoming request with id=${incomingRequest.id} cannot be parsed`,
-            );
-        }
-        return payload;
-    }
-
     isSignatureCorrect(
         signature: string,
         url: string,
@@ -234,7 +217,9 @@ export class GazpromCompletionHelper {
                 _id: orderId,
             },
             {
-                status: OrderStatus.Rejected,
+                $set: {
+                    status: OrderStatus.Rejected,
+                },
             },
         );
     }
@@ -244,13 +229,15 @@ export class GazpromCompletionHelper {
      */
     async confirmOrderInMongo(
         orderId: ObjectId,
-        orderRecord: Dictionary,
+        fieldsToUpdate: Dictionary,
     ): Promise<void> {
         await this.mongoClient.collection('orders').updateOne(
             {
                 _id: orderId,
             },
-            orderRecord,
+            {
+                $set: fieldsToUpdate,
+            },
         );
     }
 

@@ -48,8 +48,7 @@ export class GazpromCompletionWebhook {
      * Start processing the incoming request
      */
     async execute(): Promise<void> {
-        // @todo: here an error
-        const payload = this.helper.parseIncomingRequest();
+        const { payload } = this.incomingRequest;
         const incomingRequestId = this.incomingRequest.id;
 
         let cardPan: string | undefined;
@@ -125,7 +124,7 @@ export class GazpromCompletionWebhook {
          * Get order amount (price)
          */
         const inputAmount = await this.helper.parsePayloadAmount(
-            <string>payload.amount,
+            <string>payload['amount'],
             incomingRequestId,
         );
 
@@ -151,7 +150,7 @@ export class GazpromCompletionWebhook {
         /**
          * If order was rejected
          */
-        if (payload.result_code === '2') {
+        if (String(payload['result_code']) === '2') {
             const paymentTransactionRecordPostgres = {
                 userId: String(productOwner._id),
                 productId: String(order.product),
@@ -278,12 +277,13 @@ export class GazpromCompletionWebhook {
         /**
          * Update order and create payment transaction in Mongo
          */
-        const confirmedOrderRecord = {
+        const confirmedOrderRecords = {
             'payment.amount': untouchedAmount,
             status: OrderStatus.Confirmed,
             paidAt: new Date(),
         };
-        await this.helper.confirmOrderInMongo(order._id, confirmedOrderRecord);
+
+        await this.helper.confirmOrderInMongo(order._id, confirmedOrderRecords);
 
         const paymentTransactionRecordMongo = {
             type: PaymentTransactionType.Receiving,

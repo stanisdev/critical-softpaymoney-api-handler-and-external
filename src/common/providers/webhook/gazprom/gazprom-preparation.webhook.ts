@@ -33,7 +33,6 @@ export class GazpromPreparationWebhook implements WebhookFrame {
             <string>orderPaymentId,
         );
         const product = await this.dataSource.findProductById(order.product);
-        console.log(product);
 
         let payloadData: Dictionary;
         if (order instanceof Object) {
