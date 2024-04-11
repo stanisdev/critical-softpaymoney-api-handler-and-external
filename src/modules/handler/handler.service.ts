@@ -105,6 +105,8 @@ export class HandlerService {
                          */
                     }
                 }
+                return gazpromCompletionWebhook.getFinalResult();
+
                 /**
                  * Preparation handler destination
                  */

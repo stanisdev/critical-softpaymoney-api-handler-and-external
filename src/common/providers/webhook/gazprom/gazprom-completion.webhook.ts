@@ -23,12 +23,13 @@ import { GazpromExecutionResult } from './gazprom.execution-result';
 import RegularLogger from '../../logger/regular.logger';
 import DatabaseLogger from '../../logger/database.logger';
 import config from 'src/common/config';
+import { ExecutionFinalResult } from 'src/common/types/general';
+import { WebhookFrame } from 'src/common/interfaces/general';
 
 /**
  * Class to handle Gazprom bank completion webhook
  */
-export class GazpromCompletionWebhook {
-    // @todo: implement interface 'WebhookFrame'
+export class GazpromCompletionWebhook implements WebhookFrame {
     private static regularLogger = RegularLogger.getInstance();
     private static databaseLogger = DatabaseLogger.getInstance();
     private static certificates = {
@@ -343,6 +344,23 @@ export class GazpromCompletionWebhook {
     }
 
     /**
+     * Get final result
+     */
+    getFinalResult(): ExecutionFinalResult {
+        return {
+            payload: [
+                {
+                    'register-payment-response': [
+                        { result: [{ code: 1 }, { desc: 'accept payment' }] },
+                    ],
+                },
+            ],
+            contentType: ContentType.Xml,
+        };
+    }
+
+    /**
+     * @todo: REMOVE THIS METHOD
      * Get successful response object
      */
     static getSuccessfulResponse() {
