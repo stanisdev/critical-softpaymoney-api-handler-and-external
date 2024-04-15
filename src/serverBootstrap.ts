@@ -43,8 +43,6 @@ export class ServerBootstrap {
         await this.connectPostgres();
         await this.connectMongo();
 
-        // GazpromCompletionWebhook.loadCertificates(); // @todo: Refactor this
-
         /**
          * Build application instance
          */

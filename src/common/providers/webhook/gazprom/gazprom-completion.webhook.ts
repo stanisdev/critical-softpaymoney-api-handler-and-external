@@ -1,14 +1,10 @@
-import {
-    BadRequestException,
-    InternalServerErrorException,
-} from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
 import { MongoClient } from '../../mongoClient';
 import { GazpromCompletionHelper } from './gazprom-completion.helper';
 import {
     ContentType,
     DatabaseLogType,
-    IncomingRequestStatus,
     OrderStatus,
     PaymentSystem,
     PaymentTransactionType,
@@ -16,15 +12,15 @@ import {
 } from 'src/common/enums/general';
 import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { incomingRequestRepository } from 'src/database/repositories';
 import { isEmpty } from 'lodash';
 import { GazpromDataSource } from './gazprom.data-source';
 import { GazpromExecutionResult } from './gazprom.execution-result';
+import { ExecutionFinalResult } from 'src/common/types/general';
+import { WebhookFrame } from 'src/common/interfaces/general';
 import RegularLogger from '../../logger/regular.logger';
 import DatabaseLogger from '../../logger/database.logger';
 import config from 'src/common/config';
-import { ExecutionFinalResult } from 'src/common/types/general';
-import { WebhookFrame } from 'src/common/interfaces/general';
+import { GazpromSignatureVerification } from './gazprom.signature-verification';
 
 /**
  * Class to handle Gazprom bank completion webhook
@@ -49,6 +45,9 @@ export class GazpromCompletionWebhook implements WebhookFrame {
      * Start processing the incoming request
      */
     async execute(): Promise<void> {
+        /**
+         * Find in the documentation: "9.3.2 Регистрация платежа в магазине"
+         */
         const { payload } = this.incomingRequest;
         const incomingRequestId = this.incomingRequest.id;
 
@@ -63,42 +62,13 @@ export class GazpromCompletionWebhook implements WebhookFrame {
          * @todo
          * Need to be completed
          */
-        const url = '?';
-        const signature = '?';
-        let isSignatureCorrect: boolean;
-        try {
-            isSignatureCorrect = this.helper.isSignatureCorrect(
-                signature,
-                url,
-                GazpromCompletionWebhook.certificates.signatureVerification,
-            );
-        } catch {
-            /**
-             * @todo: replace by 'false'
-             */
-            isSignatureCorrect = true; // <---- @todo: replace by 'false'
-        }
-        if (!isSignatureCorrect) {
-            /**
-             * Sugnature is incorrect
-             */
-            await incomingRequestRepository
-                .createQueryBuilder()
-                .update()
-                .set({
-                    status: IncomingRequestStatus.Failed,
-                })
-                .where('id = :id', { id: this.incomingRequest.id })
-                .execute();
-
-            await GazpromCompletionWebhook.databaseLogger.write(
-                DatabaseLogType.GazpromSignatureIsIncorrect,
-                {
-                    incomingRequestId,
-                },
-            );
-            throw new BadRequestException('Signature is incorrect');
-        }
+        const gazpromSignatureVerification = new GazpromSignatureVerification(
+            this.incomingRequest,
+            'url',
+            'signature',
+            GazpromCompletionWebhook.certificates.signatureVerification,
+        );
+        await gazpromSignatureVerification.verify();
 
         const orderPaymentId = payload['o.CustomerKey'];
 

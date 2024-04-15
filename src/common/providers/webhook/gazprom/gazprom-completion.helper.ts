@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import { ObjectId } from 'mongodb';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
@@ -11,11 +10,11 @@ import {
     OrderStatus,
     Сurrency,
 } from 'src/common/enums/general';
+import DatabaseLogger from '../../logger/database.logger';
 import { PaymentTransactionEntity } from 'src/database/entities/paymentTransaction.entity';
 import { OrderEntity } from 'src/database/entities/order.entity';
 import { MathUtil } from 'src/common/utils/math.util';
 import { MongoClient } from '../../mongoClient';
-import DatabaseLogger from '../../logger/database.logger';
 import { balanceRepository } from 'src/database/repositories';
 import { BalanceEntity } from 'src/database/entities/balance.entity';
 import { BalanceUpdateQueueEntity } from 'src/database/entities/balanceUpdateQueue.entity';
@@ -54,23 +53,6 @@ export class GazpromCompletionHelper {
             ? sum - (sum * percent) / (1 + percent)
             : sum - sum * percent;
         return MathUtil.ceil10(amount - (additionalCommission || 0), -2);
-    }
-
-    isSignatureCorrect(
-        signature: string,
-        url: string,
-        certificateContent: string,
-    ): boolean {
-        const decodedSignature = decodeURIComponent(signature);
-
-        const publicKey = crypto
-            .createPublicKey({ key: certificateContent })
-            .export({ type: 'spki', format: 'pem' });
-
-        return crypto
-            .createVerify('RSA-SHA1')
-            .update(url)
-            .verify(publicKey, decodedSignature, 'base64');
     }
 
     /**
