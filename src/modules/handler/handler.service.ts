@@ -36,15 +36,15 @@ export class HandlerService {
          * @important
          * Remove the temporary construction below
          */
-        await incomingRequestRepository
-            .createQueryBuilder()
-            .update()
-            .set({
-                status: IncomingRequestStatus.Received,
-            })
-            .where('id = :id', { id: incomingRequestId })
-            .execute();
-        incomingRequest.status = IncomingRequestStatus.Received;
+        // await incomingRequestRepository
+        //     .createQueryBuilder()
+        //     .update()
+        //     .set({
+        //         status: IncomingRequestStatus.Received,
+        //     })
+        //     .where('id = :id', { id: incomingRequestId })
+        //     .execute();
+        // incomingRequest.status = IncomingRequestStatus.Received;
         // ------------- REMOVE CONSTRUCTON ABOVE -------------
 
         /**
@@ -115,6 +115,10 @@ export class HandlerService {
                     incomingRequest,
                 );
                 await gazpromPreparationWebhook.execute();
+                await gazpromPreparationWebhook.updateIncomingRequestStatus(
+                    IncomingRequestStatus.Processed,
+                );
+
                 return gazpromPreparationWebhook.getFinalResult();
 
                 /**
@@ -125,7 +129,6 @@ export class HandlerService {
                     'Unknown handler destination',
                 );
             }
-            return;
         }
         /**
          * Log the error if unknown payment system has been passed

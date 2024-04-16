@@ -36,7 +36,7 @@ export class MongoClient {
         if (isEmpty(config.db.mongo.user)) {
             connectionUrl += `${config.db.mongo.host}:${config.db.mongo.port}`;
         } else {
-            connectionUrl += `${config.db.mongo.user}:${config.db.mongo.password}@${config.db.mongo.host}:${config.db.mongo.port}`;
+            connectionUrl += `${config.db.mongo.user}:${config.db.mongo.password}@${config.db.mongo.host}:${config.db.mongo.port}/${config.db.mongo.name}`;
         }
         this.connection = new MongoConnection(connectionUrl);
     }

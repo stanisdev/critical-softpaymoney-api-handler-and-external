@@ -4,8 +4,14 @@ import { MongoClient } from '../../mongoClient';
 import { Dictionary, ExecutionFinalResult } from 'src/common/types/general';
 import { BadRequestException } from '@nestjs/common';
 import { GazpromDataSource } from './gazprom.data-source';
-import { ContentType, GazpromPaymentStatus } from 'src/common/enums/general';
+import {
+    ContentType,
+    GazpromPaymentStatus,
+    IncomingRequestStatus,
+    OrderStatus,
+} from 'src/common/enums/general';
 import { WebhookFrame } from 'src/common/interfaces/general';
+import { incomingRequestRepository } from 'src/database/repositories';
 
 export class GazpromPreparationWebhook implements WebhookFrame {
     private static databaseLogger = DatabaseLogger.getInstance();
@@ -32,29 +38,51 @@ export class GazpromPreparationWebhook implements WebhookFrame {
         const order = await this.dataSource.findOrderByPaymentId(
             <string>orderPaymentId,
         );
+        if (order.status !== OrderStatus.Created) {
+            /**
+             * @todo improve this code
+             * @add database logging
+             */
+            throw new BadRequestException(
+                'Order status does not equal "Created"',
+            );
+        }
+        if (!Number.isInteger(order?.payment?.amount)) {
+            /**
+             * @todo improve this code
+             * @add database logging
+             */
+            throw new BadRequestException(
+                'Order has incorrect "payment.amount" value',
+            );
+        }
         const product = await this.dataSource.findProductById(order.product);
 
-        let payloadData: Dictionary;
-        if (order instanceof Object) {
-            payloadData = {
-                code: 1,
-                desc: 'Payment accepted',
-                longDesc: `Оплата продукта: "${product.name}"`,
-                amount: Number(order.payment.amount),
-                currency: 643, // Трехзначный цифровой код валюты (ISO 4217)
-                exponent: 2, // Экспонента валюты платежа (ISO 4217)
-                /**
-                 * @todo: fix the line below
-                 */
-                trxId: 'oldTrx ??????',
-            };
-        } else {
-            payloadData = {
-                code: 2,
-                desc: 'Unable to accept this payment',
-            };
+        /**
+         * Save 'trx_id' in 'order.payment.trxId'
+         */
+        const trxId = payload['trx_id'];
+        if (typeof trxId === 'string' && trxId.length > 1) {
+            await this.mongoClient.collection('orders').updateOne(
+                {
+                    _id: order._id,
+                },
+                {
+                    $set: {
+                        'payment.trx_id': trxId,
+                    },
+                },
+            );
         }
-
+        const payloadData: Dictionary = {
+            code: 1,
+            desc: 'Payment accepted',
+            longDesc: `Оплата продукта: "${product.name}"`,
+            amount: Number(order.payment.amount),
+            currency: 643, // Трехзначный цифровой код валюты (ISO 4217)
+            exponent: 2, // Экспонента валюты платежа (ISO 4217)
+            trxId,
+        };
         /**
          * Define final result
          */
@@ -122,5 +150,21 @@ export class GazpromPreparationWebhook implements WebhookFrame {
         if (!isPaymentStatusCorrect) {
             throw new BadRequestException('Unacceptable payment status');
         }
+    }
+
+    /**
+     * Update incoming request status
+     */
+    async updateIncomingRequestStatus(
+        status: IncomingRequestStatus,
+    ): Promise<void> {
+        await incomingRequestRepository
+            .createQueryBuilder()
+            .update()
+            .set({
+                status,
+            })
+            .where('id = :id', { id: this.incomingRequest.id })
+            .execute();
     }
 }
