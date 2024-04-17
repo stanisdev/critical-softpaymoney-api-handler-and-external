@@ -20,6 +20,9 @@ export class IncomingRequestEntity {
     @Column('jsonb', { nullable: false })
     payload: string;
 
+    @Column('jsonb', { nullable: true })
+    metadata: string;
+
     @Column()
     @IsEnum(IncomingRequestStatus)
     status: IncomingRequestStatus;

@@ -16,6 +16,7 @@ import { MongoClient } from './common/providers/mongoClient';
 import { ServerType } from './common/enums/general';
 import { handlerPortRepository } from './database/repositories';
 import { HandlerPortEntity } from './database/entities/handlerPort.entity';
+import { GazpromCertificates } from 'src/common/providers/webhook/gazprom/gazprom.certificates';
 
 export class ServerBootstrap {
     private static instance: ServerBootstrap | null = null;
@@ -42,6 +43,8 @@ export class ServerBootstrap {
     async start() {
         await this.connectPostgres();
         await this.connectMongo();
+
+        GazpromCertificates.loadAll();
 
         /**
          * Build application instance

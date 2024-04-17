@@ -10,17 +10,15 @@ import {
     PaymentTransactionType,
     Сurrency,
 } from 'src/common/enums/general';
-import { readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
 import { isEmpty } from 'lodash';
 import { GazpromDataSource } from './gazprom.data-source';
 import { GazpromExecutionResult } from './gazprom.execution-result';
 import { ExecutionFinalResult } from 'src/common/types/general';
 import { WebhookFrame } from 'src/common/interfaces/general';
+import { GazpromCertificates } from './gazprom.certificates';
+import { GazpromSignatureVerification } from './gazprom.signature-verification';
 import RegularLogger from '../../logger/regular.logger';
 import DatabaseLogger from '../../logger/database.logger';
-import config from 'src/common/config';
-import { GazpromSignatureVerification } from './gazprom.signature-verification';
 
 /**
  * Class to handle Gazprom bank completion webhook
@@ -28,9 +26,6 @@ import { GazpromSignatureVerification } from './gazprom.signature-verification';
 export class GazpromCompletionWebhook implements WebhookFrame {
     private static regularLogger = RegularLogger.getInstance();
     private static databaseLogger = DatabaseLogger.getInstance();
-    private static certificates = {
-        signatureVerification: '',
-    };
     private mongoClient = MongoClient.getInstance().database;
     private helper: GazpromCompletionHelper;
     private dataSource: GazpromDataSource;
@@ -57,16 +52,16 @@ export class GazpromCompletionWebhook implements WebhookFrame {
         }
 
         /**
+         * @todo: refactor this way to get certificate content
+         */
+        const certificateContent =
+            GazpromCertificates.getCertificateByName('test');
+        /**
          * Signature verification.
-         * @notice
-         * @todo
-         * Need to be completed
          */
         const gazpromSignatureVerification = new GazpromSignatureVerification(
             this.incomingRequest,
-            'url',
-            'signature',
-            GazpromCompletionWebhook.certificates.signatureVerification,
+            certificateContent,
         );
         await gazpromSignatureVerification.verify();
 
@@ -288,29 +283,6 @@ export class GazpromCompletionWebhook implements WebhookFrame {
      */
     getExecutionResult(): GazpromExecutionResult {
         return this.executionResult;
-    }
-
-    /**
-     * Load certificates from files
-     */
-    static loadCertificates() {
-        const certificateFilePath = join(
-            config.dirs.keys,
-            'signature',
-            config.gazprom.certificateFileName,
-        );
-        try {
-            statSync(certificateFilePath);
-        } catch {
-            this.regularLogger.error(
-                `Cannot read certificate: ${certificateFilePath}`,
-            );
-            process.exit(1);
-        }
-        this.certificates.signatureVerification = readFileSync(
-            certificateFilePath,
-            { encoding: 'utf-8' },
-        );
     }
 
     /**
