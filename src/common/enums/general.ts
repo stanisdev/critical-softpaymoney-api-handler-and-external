@@ -38,6 +38,7 @@ export enum DatabaseLogType {
     CannotGetAtolAuthToken = 'cannot-get-atol-auth-token',
     CannotCreateAtolCheck = 'cannot-create-atol-check',
     CannotGetReportAboutCheck = 'cannot-get-report-about-check',
+    OrderStatusShouldBeEuqalCreated = 'order-status-should-be-euqal-created',
 }
 
 export enum PaymentTransactionType {

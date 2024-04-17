@@ -1,6 +1,4 @@
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
-import DatabaseLogger from '../../logger/database.logger';
-import { MongoClient } from '../../mongoClient';
 import { Dictionary, ExecutionFinalResult } from 'src/common/types/general';
 import { BadRequestException } from '@nestjs/common';
 import { GazpromDataSource } from './gazprom.data-source';
@@ -12,12 +10,15 @@ import {
 } from 'src/common/enums/general';
 import { WebhookFrame } from 'src/common/interfaces/general';
 import { incomingRequestRepository } from 'src/database/repositories';
+import { GazpromRepository } from './gazprom-preparation.repository';
+import { GazpromPreparationHelper } from './gazprom-preparation.helper';
+import config from 'src/common/config';
 
 export class GazpromPreparationWebhook implements WebhookFrame {
-    private static databaseLogger = DatabaseLogger.getInstance();
-    private mongoClient = MongoClient.getInstance().database;
     private dataSource: GazpromDataSource;
     private finalResult: ExecutionFinalResult;
+    private repository = new GazpromRepository();
+    private helper = new GazpromPreparationHelper();
 
     constructor(private readonly incomingRequest: IncomingRequestEntity) {
         this.dataSource = new GazpromDataSource(incomingRequest);
@@ -38,15 +39,11 @@ export class GazpromPreparationWebhook implements WebhookFrame {
         const order = await this.dataSource.findOrderByPaymentId(
             <string>orderPaymentId,
         );
+
         if (order.status !== OrderStatus.Created) {
-            /**
-             * @todo improve this code
-             * @add database logging
-             */
-            throw new BadRequestException(
-                'Order status does not equal "Created"',
-            );
+            await this.helper.claimIncorrectOrderStatus(order._id);
         }
+
         if (!Number.isInteger(order?.payment?.amount)) {
             /**
              * @todo improve this code
@@ -63,20 +60,11 @@ export class GazpromPreparationWebhook implements WebhookFrame {
          */
         const trxId = payload['trx_id'];
         if (typeof trxId === 'string' && trxId.length > 1) {
-            await this.mongoClient.collection('orders').updateOne(
-                {
-                    _id: order._id,
-                },
-                {
-                    $set: {
-                        'payment.trx_id': trxId,
-                    },
-                },
-            );
+            await this.repository.updateOrderPaymentTrxIdById(order._id, trxId);
         }
         const payloadData: Dictionary = {
             code: 1,
-            desc: 'Payment accepted',
+            desc: 'Payment is available',
             longDesc: `Оплата продукта: "${product.name}"`,
             amount: Number(order.payment.amount),
             currency: 643, // Трехзначный цифровой код валюты (ISO 4217)
@@ -102,7 +90,7 @@ export class GazpromPreparationWebhook implements WebhookFrame {
                     { longDesc: payloadData.longDesc }, // "Проверка доступности платежа в магазине" - сделай поиск по документации
                     {
                         'account-amount': [
-                            { id: process.env.GAZPROM_MERCH_ID }, // @todo: fix this - get from the config
+                            { id: config.gazprom.accountId },
                             { amount: +payloadData.amount * 100 },
                             { currency: payloadData.currency },
                             { exponent: payloadData.exponent },

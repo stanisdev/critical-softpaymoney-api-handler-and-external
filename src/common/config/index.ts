@@ -76,6 +76,7 @@ export default {
     },
     gazprom: {
         certificateFileName: env.GAZPROM_CERTIFICATE_FILE_NAME,
+        accountId: process.env.GAZPROM_ACCOUNT_ID,
     },
     atol: {
         login: env.ATOL_LOGIN,
