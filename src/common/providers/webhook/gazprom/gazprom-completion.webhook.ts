@@ -188,7 +188,10 @@ export class GazpromCompletionWebhook implements WebhookFrame {
         if (Number.isInteger(royalty)) {
             finalAmount -= royalty;
         }
-        const productOwnerBalance = await this.dataSource.findUserBalance(product.user, Сurrency.Rub);
+        const productOwnerBalance = await this.dataSource.findUserBalance(
+            product.user,
+            Сurrency.Rub,
+        );
 
         /**
          * All checks completed successfully.

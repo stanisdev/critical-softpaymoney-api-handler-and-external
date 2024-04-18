@@ -84,7 +84,10 @@ export class GazpromDataSource {
     /**
      * Get user balance
      */
-    async findUserBalance(userId: ObjectId, currency: Сurrency): Promise<MongoDocument> {
+    async findUserBalance(
+        userId: ObjectId,
+        currency: Сurrency,
+    ): Promise<MongoDocument> {
         const productOwnerBalance = await this.mongoClient
             .collection('payments')
             .findOne({
