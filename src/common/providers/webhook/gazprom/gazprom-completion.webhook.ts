@@ -188,31 +188,7 @@ export class GazpromCompletionWebhook implements WebhookFrame {
         if (Number.isInteger(royalty)) {
             finalAmount -= royalty;
         }
-
-        /**
-         * Find product owner balance record
-         *
-         * @todo: move to the helper
-         */
-        const productOwnerBalance = await this.mongoClient
-            .collection('payments')
-            .findOne({
-                user: product.user,
-                type: Сurrency.Rub,
-            });
-        if (!(productOwnerBalance instanceof Object)) {
-            await GazpromCompletionWebhook.databaseLogger.write(
-                DatabaseLogType.ProductOwnerBalanceInMongoNotFound,
-                {
-                    incomingRequestId,
-                    'productOwner.id': product.user,
-                    currencyType: Сurrency.Rub,
-                },
-            );
-            throw new InternalServerErrorException(
-                `Product owner balance not found (id = "${product.user}")`,
-            );
-        }
+        const productOwnerBalance = await this.dataSource.findUserBalance(product.user, Сurrency.Rub);
 
         /**
          * All checks completed successfully.

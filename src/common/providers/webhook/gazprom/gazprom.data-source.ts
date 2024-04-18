@@ -5,6 +5,7 @@ import { DatabaseLogType } from 'src/common/enums/general';
 import { InternalServerErrorException } from '@nestjs/common';
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
 import { MongoDocument } from 'src/common/types/general';
+import { Сurrency } from 'src/common/enums/general';
 
 export class GazpromDataSource {
     private static databaseLogger = DatabaseLogger.getInstance();
@@ -78,5 +79,31 @@ export class GazpromDataSource {
             );
         }
         return productOwner;
+    }
+
+    /**
+     * Get user balance
+     */
+    async findUserBalance(userId: ObjectId, currency: Сurrency): Promise<MongoDocument> {
+        const productOwnerBalance = await this.mongoClient
+            .collection('payments')
+            .findOne({
+                user: userId,
+                type: currency,
+            });
+        if (!(productOwnerBalance instanceof Object)) {
+            await GazpromDataSource.databaseLogger.write(
+                DatabaseLogType.ProductOwnerBalanceInMongoNotFound,
+                {
+                    incomingRequestId: this.incomingRequest.id,
+                    userId,
+                    currencyType: currency,
+                },
+            );
+            throw new InternalServerErrorException(
+                `Product owner balance not found (user.id = "${userId}")`,
+            );
+        }
+        return productOwnerBalance;
     }
 }
