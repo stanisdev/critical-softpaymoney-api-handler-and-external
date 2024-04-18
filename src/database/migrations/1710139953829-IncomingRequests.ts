@@ -10,6 +10,7 @@ export class IncomingRequests1710139953829 implements MigrationInterface {
             CREATE TABLE "IncomingRequests" (
                 id INTEGER DEFAULT nextval('IncomingRequests_id_seq') PRIMARY KEY,
                 payload jsonb NOT NULL,
+                metadata jsonb,
                 status IncomingRequestStatus NOT NULL,
                 "paymentSystem" VARCHAR NOT NULL, -- Payment system name
                 "handlerDestination" VARCHAR NOT NULL, -- Related to a endpoint of the handler controller

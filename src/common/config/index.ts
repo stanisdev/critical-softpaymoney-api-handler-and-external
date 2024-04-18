@@ -30,7 +30,7 @@ dotenv.config({
  */
 export default {
     dirs: {
-        keys: join(rootDir, 'keys'),
+        certificates: join(rootDir, 'certificates'),
     },
     server: {
         port: {

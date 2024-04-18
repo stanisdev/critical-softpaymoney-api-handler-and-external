@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import DatabaseLogger from '../../logger/database.logger';
 import { strictEqual } from 'node:assert';
 import { BadRequestException } from '@nestjs/common';
@@ -8,26 +8,51 @@ import {
     IncomingRequestStatus,
 } from 'src/common/enums/general';
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
+import RegularLogger from '../../logger/regular.logger';
 
 export class GazpromSignatureVerification {
     private static databaseLogger = DatabaseLogger.getInstance();
+    private static regularLogger = RegularLogger.getInstance();
 
     constructor(
         private readonly incomingRequest: IncomingRequestEntity,
-        private readonly url: string,
-        private readonly signature: string,
         private readonly certificateContent: string,
     ) {}
 
+    /**
+     * Verification process
+     */
     async verify() {
         try {
             const isSignatureCorrect = this.isSignatureCorrect();
             strictEqual(isSignatureCorrect, true);
-        } catch {
+        } catch (error) {
+            GazpromSignatureVerification.regularLogger.error(error);
             await this.claimSignatureIncorrectness();
         }
     }
 
+    /**
+     * Check signature correctness
+     */
+    isSignatureCorrect(): boolean {
+        const decodedSignature = this.incomingRequest.payload['signature'];
+        const fullUrl = this.incomingRequest.metadata['fullUrl'];
+        const [shortenUrl] = fullUrl.split('&signature=');
+
+        const publicKey = crypto
+            .createPublicKey({ key: this.certificateContent })
+            .export({ type: 'spki', format: 'pem' });
+
+        return crypto
+            .createVerify('RSA-SHA1')
+            .update(shortenUrl)
+            .verify(publicKey, decodedSignature, 'base64');
+    }
+
+    /**
+     * Claim signature incorrectness and throw an error
+     */
     async claimSignatureIncorrectness(): Promise<never> {
         const incomingRequestId = this.incomingRequest.id;
         await incomingRequestRepository
@@ -46,18 +71,5 @@ export class GazpromSignatureVerification {
             },
         );
         throw new BadRequestException('Signature is incorrect');
-    }
-
-    isSignatureCorrect(): boolean {
-        const decodedSignature = decodeURIComponent(this.signature);
-
-        const publicKey = crypto
-            .createPublicKey({ key: this.certificateContent })
-            .export({ type: 'spki', format: 'pem' });
-
-        return crypto
-            .createVerify('RSA-SHA1')
-            .update(this.url)
-            .verify(publicKey, decodedSignature, 'base64');
     }
 }
