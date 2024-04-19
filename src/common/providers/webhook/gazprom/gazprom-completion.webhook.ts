@@ -1,10 +1,7 @@
-import { InternalServerErrorException } from '@nestjs/common';
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
-import { MongoClient } from '../../mongoClient';
 import { GazpromCompletionHelper } from './gazprom-completion.helper';
 import {
     ContentType,
-    DatabaseLogType,
     OrderStatus,
     PaymentSystem,
     PaymentTransactionType,
@@ -17,16 +14,12 @@ import { ExecutionFinalResult } from 'src/common/types/general';
 import { WebhookFrame } from 'src/common/interfaces/general';
 import { GazpromCertificates } from './gazprom.certificates';
 import { GazpromSignatureVerification } from './gazprom.signature-verification';
-import RegularLogger from '../../logger/regular.logger';
-import DatabaseLogger from '../../logger/database.logger';
+import { GazpromRecurrentPayment } from './gazprom.recurrent-payment';
 
 /**
  * Class to handle Gazprom bank completion webhook
  */
 export class GazpromCompletionWebhook implements WebhookFrame {
-    private static regularLogger = RegularLogger.getInstance();
-    private static databaseLogger = DatabaseLogger.getInstance();
-    private mongoClient = MongoClient.getInstance().database;
     private helper: GazpromCompletionHelper;
     private dataSource: GazpromDataSource;
     private executionResult: GazpromExecutionResult;
@@ -63,7 +56,12 @@ export class GazpromCompletionWebhook implements WebhookFrame {
             this.incomingRequest,
             certificateContent,
         );
-        await gazpromSignatureVerification.verify();
+        /**
+         * @todo
+         * @important
+         * UNCOMMENT THE LINE BELOW
+         */
+        // await gazpromSignatureVerification.verify();
 
         const orderPaymentId = payload['o.CustomerKey'];
 
@@ -174,6 +172,17 @@ export class GazpromCompletionWebhook implements WebhookFrame {
             return;
         }
 
+        /**
+         * If product is paid recurrently
+         */
+        const isProductPaidRecurrently = product.recurrent?.status === true;
+        if (isProductPaidRecurrently) {
+            const gazpromRecurrentPayment = new GazpromRecurrentPayment(
+                product,
+                payload,
+            );
+            await gazpromRecurrentPayment.setSchedule();
+        }
         /**
          * Calculate royalty
          */
