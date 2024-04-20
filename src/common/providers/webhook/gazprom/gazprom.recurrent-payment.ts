@@ -1,7 +1,7 @@
 import * as moment from 'moment';
 import { GazpromPaymentStatus, PaymentSystem } from 'src/common/enums/general';
 import { Dictionary, MongoDocument } from 'src/common/types/general';
-import { typeOrmDataSource } from 'src/database/data-source';
+import { EntityManager } from 'typeorm';
 
 export class GazpromRecurrentPayment {
     constructor(
@@ -11,6 +11,7 @@ export class GazpromRecurrentPayment {
          * запись таблицы 'IncomingRequest'
          */
         private readonly payload: string,
+        private readonly transactionalEntityManager: EntityManager,
     ) {}
 
     /**
@@ -73,6 +74,6 @@ export class GazpromRecurrentPayment {
                     DEFAULT
                 );
         `;
-        await typeOrmDataSource.query(query);
+        await this.transactionalEntityManager.query(query);
     }
 }

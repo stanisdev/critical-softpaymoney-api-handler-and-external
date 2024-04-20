@@ -15,6 +15,7 @@ import { WebhookFrame } from 'src/common/interfaces/general';
 import { GazpromCertificates } from './gazprom.certificates';
 import { GazpromSignatureVerification } from './gazprom.signature-verification';
 import { GazpromRecurrentPayment } from './gazprom.recurrent-payment';
+import { GazpromCompleteTransactionExecutor } from './gazprom-completion.transaction-executor';
 
 /**
  * Class to handle Gazprom bank completion webhook
@@ -173,17 +174,6 @@ export class GazpromCompletionWebhook implements WebhookFrame {
         }
 
         /**
-         * If product is paid recurrently
-         */
-        const isProductPaidRecurrently = product.recurrent?.status === true;
-        if (isProductPaidRecurrently) {
-            const gazpromRecurrentPayment = new GazpromRecurrentPayment(
-                product,
-                payload,
-            );
-            await gazpromRecurrentPayment.setSchedule();
-        }
-        /**
          * Calculate royalty
          */
         let finalAmount = commissionSubtractedAmount;
@@ -221,13 +211,23 @@ export class GazpromCompletionWebhook implements WebhookFrame {
             paidAt: new Date(),
             updatedAt: new Date(),
         };
-        await this.helper.completePaidOrderInPostgres({
+
+        /**
+         * Execute the main transaction of successfully paid order
+         */
+        const isProductPaidRecurrently = product.recurrent?.status === true;
+        const { incomingRequest } = this;
+
+        await new GazpromCompleteTransactionExecutor({
+            product,
             productOwner,
             productOwnerBalance,
             orderRecord,
             paymentTransactionRecord,
-            incomingRequestId,
-        });
+            incomingRequest,
+            isProductPaidRecurrently,
+        }).execute();
+
         /**
          * Update order and create payment transaction in Mongo
          */

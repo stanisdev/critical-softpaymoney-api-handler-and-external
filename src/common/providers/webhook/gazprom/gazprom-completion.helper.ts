@@ -4,20 +4,15 @@ import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.ent
 import { Dictionary, MongoDocument } from 'src/common/types/general';
 import { typeOrmDataSource } from 'src/database/data-source';
 import {
-    BalanceUpdateOperation,
     DatabaseLogType,
     IncomingRequestStatus,
     OrderStatus,
-    Сurrency,
 } from 'src/common/enums/general';
 import DatabaseLogger from '../../logger/database.logger';
 import { PaymentTransactionEntity } from 'src/database/entities/paymentTransaction.entity';
 import { OrderEntity } from 'src/database/entities/order.entity';
 import { MathUtil } from 'src/common/utils/math.util';
 import { MongoClient } from '../../mongoClient';
-import { balanceRepository } from 'src/database/repositories';
-import { BalanceEntity } from 'src/database/entities/balance.entity';
-import { BalanceUpdateQueueEntity } from 'src/database/entities/balanceUpdateQueue.entity';
 
 export class GazpromCompletionHelper {
     private static databaseLogger = DatabaseLogger.getInstance();
@@ -86,105 +81,6 @@ export class GazpromCompletionHelper {
                         status: IncomingRequestStatus.Processed,
                     })
                     .where('id = :id', { id: params.incomingRequestId })
-                    .execute();
-            },
-        );
-    }
-
-    /**
-     * Execute Postgres transaction to complete the given order
-     */
-    async completePaidOrderInPostgres(params: {
-        productOwner: Dictionary;
-        productOwnerBalance: Dictionary;
-        orderRecord: Dictionary;
-        paymentTransactionRecord: Dictionary;
-        incomingRequestId: number;
-    }): Promise<void> {
-        const balanceInstance = await balanceRepository
-            .createQueryBuilder('b')
-            .where('b."userId" = :userId', {
-                userId: String(params.productOwner._id),
-            })
-            .andWhere('b."currencyType" = :currencyType', {
-                currencyType: Сurrency.Rub,
-            })
-            .select(['b.id'])
-            .limit(1)
-            .getOne();
-
-        let balanceRecord: Dictionary | undefined;
-
-        if (!(balanceInstance instanceof BalanceEntity)) {
-            const { productOwnerBalance } = params;
-
-            balanceRecord = {
-                mongoId: String(productOwnerBalance._id),
-                value: Number(productOwnerBalance.balance),
-                userId: String(productOwnerBalance.user),
-                currencyType: productOwnerBalance.type,
-                verificationHash: productOwnerBalance.balance_hash,
-            };
-            if ('card' in productOwnerBalance) {
-                balanceRecord['cardId'] = String(productOwnerBalance.card);
-            }
-            if ('withdrawalAt' in productOwnerBalance) {
-                balanceRecord['withdrawalAt'] =
-                    productOwnerBalance.withdrawalAt;
-            }
-        }
-
-        await typeOrmDataSource.manager.transaction(
-            'SERIALIZABLE',
-            async (transactionalEntityManager) => {
-                await transactionalEntityManager
-                    .createQueryBuilder()
-                    .insert()
-                    .into(PaymentTransactionEntity)
-                    .values(params.paymentTransactionRecord)
-                    .execute();
-                await transactionalEntityManager
-                    .createQueryBuilder()
-                    .insert()
-                    .into(OrderEntity)
-                    .values(params.orderRecord)
-                    .execute();
-                await transactionalEntityManager
-                    .createQueryBuilder()
-                    .update(IncomingRequestEntity)
-                    .set({
-                        status: IncomingRequestStatus.Processed,
-                    })
-                    .where('id = :id', { id: params.incomingRequestId })
-                    .execute();
-
-                let balanceId: number;
-
-                /**
-                 * Create user balance if not exist
-                 */
-                if (balanceRecord instanceof Object) {
-                    const insertResult = await transactionalEntityManager
-                        .createQueryBuilder()
-                        .insert()
-                        .into(BalanceEntity)
-                        .values(balanceRecord)
-                        .execute();
-
-                    balanceId = Number(insertResult.raw[0].id);
-                } else {
-                    balanceId = balanceInstance.id;
-                }
-                const balanceUpdateQueueRecord = {
-                    balanceId,
-                    amount: Number(params.paymentTransactionRecord.amount),
-                    operation: BalanceUpdateOperation.Increment,
-                };
-                await transactionalEntityManager
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BalanceUpdateQueueEntity)
-                    .values(balanceUpdateQueueRecord)
                     .execute();
             },
         );
