@@ -13,7 +13,7 @@ async function execute(): Promise<void> {
     if (scriptName === 'recurrent-payments-executor') {
         await new RecurrentPaymentsExecutor().execute();
     }
-    regularLogger.log(`Script '${scriptName}' successfully ended it's job`);
+    regularLogger.log(`Script '${scriptName}' successfully ended its job`);
     process.exit();
 }
 
