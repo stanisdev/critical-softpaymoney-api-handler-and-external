@@ -12,17 +12,25 @@ export class RecurrentPaymentsQueueEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('timestamp', {
+        nullable: false,
+    })
     dateToExecute: Date;
 
-    @Column()
+    @Column('boolean', {
+        nullable: false,
+    })
     isFirstPeriod: boolean;
 
-    @Column()
+    @Column('character', {
+        nullable: false,
+    })
     @Length(24)
     productIdMongo: string;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(PaymentSystem)
     paymentSystem: PaymentSystem;
 

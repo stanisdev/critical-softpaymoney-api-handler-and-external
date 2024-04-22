@@ -7,19 +7,29 @@ export class BalanceUpdateQueueEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('integer', {
+        nullable: false,
+    })
     balanceId: number;
 
-    @Column()
+    @Column('decimal', {
+        nullable: false,
+    })
     amount: number;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(BalanceUpdateOperation)
     operation: BalanceUpdateOperation;
 
-    @Column()
+    @Column('boolean', {
+        nullable: true,
+    })
     isWithdrawal: boolean;
 
-    @Column()
+    @Column('integer', {
+        nullable: true,
+    })
     paymentTransactionId: number;
 }

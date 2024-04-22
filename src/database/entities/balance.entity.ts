@@ -13,31 +13,45 @@ export class BalanceEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @Length(24)
     mongoId: string;
 
-    @Column()
+    @Column('decimal', {
+        nullable: false,
+    })
     @IsNumber()
     @Min(0)
     value: number;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(Сurrency)
     currencyType: Сurrency;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @Length(24)
     userId: string;
 
-    @Column()
+    @Column('varchar', {
+        nullable: true,
+    })
     @Length(24)
     cardId: string;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     verificationHash: string;
 
-    @Column()
+    @Column('timestamp', {
+        nullable: true,
+    })
     withdrawalAt: Date;
 
     @CreateDateColumn()

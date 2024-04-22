@@ -12,11 +12,15 @@ export class LogEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(DatabaseLogType)
     type: DatabaseLogType;
 
-    @Column()
+    @Column('jsonb', {
+        nullable: false,
+    })
     payload: string;
 
     @CreateDateColumn()

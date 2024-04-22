@@ -17,7 +17,6 @@ import { ServerType } from './common/enums/general';
 import { handlerPortRepository } from './database/repositories';
 import { HandlerPortEntity } from './database/entities/handlerPort.entity';
 import { GazpromCertificates } from 'src/common/providers/webhook/gazprom/gazprom.certificates';
-import { IndependentScriptExecutor } from './independent-script-executor';
 
 export class ServerBootstrap {
     private static instance: ServerBootstrap | null = null;
@@ -45,14 +44,6 @@ export class ServerBootstrap {
         await this.connectPostgres();
         await this.connectMongo();
 
-        /**
-         * @notice it's temporary workaround of running an independent script,
-         * and it's necessary to use another way
-         */
-        if (process.env.IS_INDEPENDENT_SCRIPT === 'true') {
-            await new IndependentScriptExecutor().execute();
-            return;
-        }
         GazpromCertificates.loadAll();
 
         /**

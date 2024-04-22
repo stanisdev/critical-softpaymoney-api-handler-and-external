@@ -13,27 +13,41 @@ export class OrderEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('character', {
+        nullable: false,
+    })
     mongoOrderId: string;
 
-    @Column()
+    @Column('character', {
+        nullable: false,
+    })
     mongoProductId: string;
 
-    @Column()
+    @Column('varchar', {
+        nullable: true,
+    })
     paymentId: string;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(PaymentSystem)
     paymentSystem: PaymentSystem;
 
-    @Column()
+    @Column('decimal', {
+        nullable: false,
+    })
     paymentAmount: number;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(OrderStatus)
     status: OrderStatus;
 
-    @Column()
+    @Column('timestamp', {
+        nullable: true,
+    })
     paidAt: Date;
 
     @CreateDateColumn()

@@ -23,15 +23,21 @@ export class IncomingRequestEntity {
     @Column('jsonb', { nullable: true })
     metadata: string;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(IncomingRequestStatus)
     status: IncomingRequestStatus;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(PaymentSystem)
     paymentSystem: PaymentSystem;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     @IsEnum(HandlerDestination)
     handlerDestination: HandlerDestination;
 

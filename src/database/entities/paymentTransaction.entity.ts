@@ -12,26 +12,38 @@ export class PaymentTransactionEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('character', {
+        nullable: false,
+    })
     @Length(24)
     userId: string;
 
-    @Column()
+    @Column('character', {
+        nullable: false,
+    })
     @Length(24)
     productId: string;
 
-    @Column()
+    @Column('character', {
+        nullable: false,
+    })
     @Length(24)
     orderId: string;
 
-    @Column()
+    @Column('decimal', {
+        nullable: false,
+    })
     @IsNumber()
     amount: number;
 
-    @Column()
+    @Column('varchar', {
+        nullable: true,
+    })
     pan: string;
 
-    @Column()
+    @Column('varchar', {
+        nullable: false,
+    })
     type: string;
 
     @CreateDateColumn()

@@ -10,7 +10,9 @@ export class HandlerPortEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column('integer', {
+        nullable: false,
+    })
     value: number;
 
     @CreateDateColumn()

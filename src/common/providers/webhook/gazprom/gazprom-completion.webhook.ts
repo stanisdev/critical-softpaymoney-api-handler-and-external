@@ -14,7 +14,6 @@ import { ExecutionFinalResult } from 'src/common/types/general';
 import { WebhookFrame } from 'src/common/interfaces/general';
 import { GazpromCertificates } from './gazprom.certificates';
 import { GazpromSignatureVerification } from './gazprom.signature-verification';
-import { GazpromRecurrentPayment } from './gazprom.recurrent-payment';
 import { GazpromCompleteTransactionExecutor } from './gazprom-completion.transaction-executor';
 
 /**

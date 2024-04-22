@@ -6,7 +6,10 @@ function getRootDir(): string {
     const directoryHierarchy = parse(__dirname).dir.split('/');
     let dirNameDelimiter: string;
 
-    if (nodeEnv.includes('test')) {
+    if (
+        nodeEnv.includes('test') ||
+        process.env.IS_INDEPENDENT_SCRIPT === 'true'
+    ) {
         dirNameDelimiter = 'src';
     } else {
         dirNameDelimiter = 'dist';
