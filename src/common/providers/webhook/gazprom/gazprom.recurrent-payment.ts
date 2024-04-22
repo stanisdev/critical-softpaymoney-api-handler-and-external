@@ -4,6 +4,8 @@ import { Dictionary, MongoDocument } from 'src/common/types/general';
 import { EntityManager } from 'typeorm';
 
 export class GazpromRecurrentPayment {
+    private isFirstPeriod: boolean;
+
     constructor(
         private readonly orderMongoInstance: MongoDocument,
         private readonly productMongoInstance: MongoDocument,
@@ -22,13 +24,6 @@ export class GazpromRecurrentPayment {
         const metadata = {
             trxId: this.payload['trx_id'],
         };
-        const recurrentPeriod = Number(
-            this.productMongoInstance.recurrent?.period,
-        );
-        const dateToExecute = moment()
-            .add(recurrentPeriod, 'days')
-            .format('YYYY-MM-DD HH:mm:ss');
-
         /**
          * Если пришёл вебхук при самой первой оплате, то payload['o.PaymentStatus'] = new
          * значит так мы поймем, что следующий рекуррентные платёж будет относится к 'first period'
@@ -37,16 +32,24 @@ export class GazpromRecurrentPayment {
          *
          * Если пришёл вебхук с payload['o.PaymentStatus'] = auto, значит в любом случае первый период уже пройден.
          */
-        let isFirstPeriod: boolean;
         if (this.payload['o.PaymentStatus'] === GazpromPaymentStatus.New) {
-            isFirstPeriod = false;
+            this.isFirstPeriod = true;
         } else {
-            isFirstPeriod = true;
+            this.isFirstPeriod = false;
         }
+
+        /**
+         * Define date of the next recurrent payment
+         */
+        const recurrentPeriod = Number(this.getRecurrentPeriod());
+
+        const dateToExecute = moment()
+            .add(recurrentPeriod, 'days')
+            .format('YYYY-MM-DD HH:mm:ss');
 
         const recurrentPaymentsQueueRecord = {
             dateToExecute,
-            isFirstPeriod,
+            isFirstPeriod: this.isFirstPeriod,
             orderIdMongo: String(this.orderMongoInstance._id),
             paymentSystem: PaymentSystem.Gazprom,
             metadata: JSON.stringify(metadata),
@@ -54,6 +57,26 @@ export class GazpromRecurrentPayment {
         await this.addRecordToRecurrentPaymentsQueue(
             recurrentPaymentsQueueRecord,
         );
+    }
+
+    /**
+     * Get recurrent period (first or ordinary)
+     */
+    private getRecurrentPeriod(): number {
+        const { productMongoInstance } = this;
+        const recurrentFirstPeriod = productMongoInstance.recurrent.firstPeriod;
+        const recurrentPeriod = productMongoInstance.recurrent.period;
+
+        if (
+            this.isFirstPeriod &&
+            productMongoInstance.recurrent.firstStatus === true &&
+            Number.isInteger(recurrentFirstPeriod) &&
+            recurrentFirstPeriod > 0
+        ) {
+            return recurrentFirstPeriod;
+        } else {
+            return recurrentPeriod;
+        }
     }
 
     /**
