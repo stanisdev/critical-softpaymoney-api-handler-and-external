@@ -4,7 +4,13 @@ import { existsSync as doesFileExist } from 'fs';
 
 function getRootDir(): string {
     const directoryHierarchy = parse(__dirname).dir.split('/');
-    const dirNameDelimiter = nodeEnv.includes('test') ? 'src' : 'dist';
+    let dirNameDelimiter: string;
+
+    if (nodeEnv.includes('test')) {
+        dirNameDelimiter = 'src';
+    } else {
+        dirNameDelimiter = 'dist';
+    }
     const distIndex = directoryHierarchy.lastIndexOf(dirNameDelimiter);
     return directoryHierarchy.slice(0, distIndex).join('/');
 }

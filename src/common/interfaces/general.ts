@@ -10,3 +10,7 @@ export interface WebhookFrame {
     execute(): Promise<void>;
     getFinalResult(): ExecutionFinalResult;
 }
+
+export interface IndependentScript {
+    execute(): Promise<void>;
+}

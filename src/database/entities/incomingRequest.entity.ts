@@ -3,7 +3,7 @@ import {
     HandlerDestination,
     IncomingRequestStatus,
     PaymentSystem,
-} from 'src/common/enums/general';
+} from '../../common/enums/general';
 import {
     Entity,
     PrimaryGeneratedColumn,

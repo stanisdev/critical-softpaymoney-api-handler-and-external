@@ -22,7 +22,7 @@ export class GazpromSignatureVerification {
     /**
      * Verification process
      */
-    async verify() {
+    async verify(): Promise<void> {
         try {
             const isSignatureCorrect = this.isSignatureCorrect();
             strictEqual(isSignatureCorrect, true);
@@ -70,6 +70,6 @@ export class GazpromSignatureVerification {
                 incomingRequestId,
             },
         );
-        throw new BadRequestException('Signature is incorrect');
+        throw new BadRequestException('Gazprom signature is incorrect');
     }
 }

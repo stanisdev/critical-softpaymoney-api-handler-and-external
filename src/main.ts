@@ -1,4 +1,4 @@
-import { ServerBootstrap } from './serverBootstrap';
+import { ServerBootstrap } from './server-bootstrap';
 
 async function bootstrap() {
     await ServerBootstrap.getInstance().start();

@@ -1,5 +1,5 @@
 import { IsEnum } from 'class-validator';
-import { DatabaseLogType } from 'src/common/enums/general';
+import { DatabaseLogType } from '../../common/enums/general';
 import {
     Column,
     CreateDateColumn,

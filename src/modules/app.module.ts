@@ -3,7 +3,7 @@ import { typeOrmDataSource } from 'src/database/data-source';
 import { HandlerModule } from './handler/handler.module';
 import { ExternalInteractionModule } from './external-interaction/external-interaction.module';
 import { MongoClient } from 'src/common/providers/mongoClient';
-import { ServerBootstrap } from 'src/serverBootstrap';
+import { ServerBootstrap } from 'src/server-bootstrap';
 import RegularLogger from 'src/common/providers/logger/regular.logger';
 
 @Module({
@@ -32,7 +32,7 @@ export class AppModule implements OnModuleDestroy {
         if (serveModuleParam === 'handler') {
             modules.push(HandlerModule);
             /**
-             * External interactio server
+             * External interaction server
              */
         } else if (serveModuleParam === 'externalInteraction') {
             modules.push(ExternalInteractionModule);

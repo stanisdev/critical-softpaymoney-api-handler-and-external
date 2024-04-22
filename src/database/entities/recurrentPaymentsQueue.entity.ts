@@ -1,5 +1,5 @@
 import { IsEnum, Length } from 'class-validator';
-import { PaymentSystem } from 'src/common/enums/general';
+import { PaymentSystem } from '../../common/enums/general';
 import {
     Column,
     CreateDateColumn,
