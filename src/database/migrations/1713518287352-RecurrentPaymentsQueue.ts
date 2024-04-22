@@ -9,7 +9,7 @@ export class RecurrentPaymentsQueue1713518287352 implements MigrationInterface {
                 id INTEGER DEFAULT nextval('RecurrentPaymentsQueue_id_seq') PRIMARY KEY,
                 "dateToExecute" TIMESTAMP NOT NULL,
                 "isFirstPeriod" BOOLEAN NOT NULL,
-                "productIdMongo" CHARACTER(24) NOT NULL,
+                "orderIdMongo" CHARACTER(24) NOT NULL,
                 "paymentSystem" VARCHAR NOT NULL,
                 metadata jsonb NOT NULL,
                 "createdAt" TIMESTAMP DEFAULT current_timestamp

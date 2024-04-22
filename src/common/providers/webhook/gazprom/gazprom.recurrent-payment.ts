@@ -5,6 +5,7 @@ import { EntityManager } from 'typeorm';
 
 export class GazpromRecurrentPayment {
     constructor(
+        private readonly orderMongoInstance: MongoDocument,
         private readonly productMongoInstance: MongoDocument,
         /**
          * payload - это значение, которое берется из поля 'payload',
@@ -46,7 +47,7 @@ export class GazpromRecurrentPayment {
         const recurrentPaymentsQueueRecord = {
             dateToExecute,
             isFirstPeriod,
-            productIdMongo: String(this.productMongoInstance._id),
+            orderIdMongo: String(this.orderMongoInstance._id),
             paymentSystem: PaymentSystem.Gazprom,
             metadata: JSON.stringify(metadata),
         };
@@ -63,12 +64,12 @@ export class GazpromRecurrentPayment {
     ): Promise<void> {
         const query = `
             INSERT INTO "RecurrentPaymentsQueue"
-                ("dateToExecute", "isFirstPeriod", "productIdMongo", "paymentSystem", "metadata", "createdAt")
+                ("dateToExecute", "isFirstPeriod", "orderIdMongo", "paymentSystem", "metadata", "createdAt")
             VALUES
                 (
                     '${recurrentPaymentsQueueRecord.dateToExecute}',
                     ${recurrentPaymentsQueueRecord.isFirstPeriod},
-                    '${recurrentPaymentsQueueRecord.productIdMongo}',
+                    '${recurrentPaymentsQueueRecord.orderIdMongo}',
                     '${recurrentPaymentsQueueRecord.paymentSystem}',
                     '${recurrentPaymentsQueueRecord.metadata}',
                     DEFAULT

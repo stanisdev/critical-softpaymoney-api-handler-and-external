@@ -26,7 +26,13 @@ export class RecurrentPaymentsQueueEntity {
         nullable: false,
     })
     @Length(24)
-    productIdMongo: string;
+    /**
+     * Это поле используется для получения данных об order,
+     * который был создан ранее (как правило при самой первой оплате),
+     * и на основе эти данных будет создан новый order, который будет использоваться
+     * в качестве order для оплаты очередного авто-платежа.
+     */
+    orderIdMongo: string;
 
     @Column('varchar', {
         nullable: false,

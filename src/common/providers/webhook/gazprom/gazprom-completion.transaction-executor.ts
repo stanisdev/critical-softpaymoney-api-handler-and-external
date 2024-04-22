@@ -19,7 +19,8 @@ export class GazpromCompleteTransactionExecutor {
 
     constructor(
         private params: {
-            product: MongoDocument;
+            orderInstance: MongoDocument;
+            productInstance: MongoDocument;
             productOwner: MongoDocument;
             productOwnerBalance: MongoDocument;
             orderRecord: Dictionary;
@@ -106,7 +107,8 @@ export class GazpromCompleteTransactionExecutor {
                  */
                 if (this.params.isProductPaidRecurrently) {
                     await new GazpromRecurrentPayment(
-                        this.params.product,
+                        this.params.orderInstance,
+                        this.params.productInstance,
                         this.params.incomingRequest.payload,
                         transactionalEntityManager,
                     ).setSchedule();

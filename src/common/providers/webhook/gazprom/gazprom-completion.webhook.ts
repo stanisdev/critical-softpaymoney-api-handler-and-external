@@ -218,7 +218,8 @@ export class GazpromCompletionWebhook implements WebhookFrame {
         const { incomingRequest } = this;
 
         await new GazpromCompleteTransactionExecutor({
-            product,
+            orderInstance: order,
+            productInstance: product,
             productOwner,
             productOwnerBalance,
             orderRecord,
