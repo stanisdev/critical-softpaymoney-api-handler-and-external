@@ -96,4 +96,7 @@ export default {
         inn: env.ATOL_INN,
         paymentUrl: env.ATOL_PAYMENT_URL,
     },
+    recurrentPayments: {
+        recordsPerTime: +env.RECURRENT_PAYMENTS_RECORDS_PER_TIME,
+    },
 };
