@@ -29,9 +29,9 @@ export class RecurrentPaymentsHelper {
     ) {}
 
     /**
-     * Process record from the 'RecurrentPaymentsQueue' table
+     * Find 'order' and 'product'
      */
-    async processRecurrentPaymentsQueueRecord(): Promise<void> {
+    async fillDataSource(): Promise<void> {
         const { recurrentPaymentsQueueRecord } = this;
 
         /**
@@ -44,12 +44,13 @@ export class RecurrentPaymentsHelper {
             });
         if (!(this.orderMongoInstance instanceof Object)) {
             await this.deleteRecurrentPaymentsQueueRecord();
+            return;
         }
 
         /**
          *  Find product in Mongo
          */
-        this.productMongoInstance = await this.findProductByIdInMongo(
+        this.productMongoInstance = await this.findMongoProductById(
             new ObjectId(this.orderMongoInstance.product),
         );
         const { productMongoInstance } = this;
@@ -124,9 +125,6 @@ export class RecurrentPaymentsHelper {
         delete orderRecord['receipt'];
         delete orderRecord['_id'];
 
-        /**
-         * @todo: uncomment line below
-         */
         await this.mongoClient.collection('orders').insertOne(orderRecord);
     }
 
@@ -187,9 +185,6 @@ export class RecurrentPaymentsHelper {
          * This is a temporary workaround and should be changed in the future
          */
         if (requestResult.ok !== true) {
-            /**
-             * @todo: uncomment the code below
-             */
             const payload = {
                 order: this.orderRecord,
             };
@@ -218,7 +213,7 @@ export class RecurrentPaymentsHelper {
     /**
      * Find Mongo product by id
      */
-    private findProductByIdInMongo(id: ObjectId): Promise<MongoDocument> {
+    private findMongoProductById(id: ObjectId): Promise<MongoDocument> {
         return this.mongoClient.collection('products').findOne({ _id: id });
     }
 }

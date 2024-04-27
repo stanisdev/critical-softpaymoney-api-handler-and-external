@@ -41,7 +41,7 @@ export class RecurrentPaymentsExecutor implements IndependentScript {
                 const helper = new RecurrentPaymentsHelper(
                     recurrentPaymentsQueueRecord,
                 );
-                await helper.processRecurrentPaymentsQueueRecord();
+                await helper.fillDataSource();
 
                 if (!helper.isItAllowableToProceedExecution) {
                     continue;
