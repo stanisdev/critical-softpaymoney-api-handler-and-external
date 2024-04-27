@@ -85,7 +85,13 @@ export default {
     },
     gazprom: {
         certificateFileName: env.GAZPROM_CERTIFICATE_FILE_NAME,
-        accountId: process.env.GAZPROM_ACCOUNT_ID,
+        accountId: env.GAZPROM_ACCOUNT_ID,
+        urlToInitiateRecurringPayment:
+            env.GAZPROM_LINK_TO_INITIATE_RECURRING_PAYMENT,
+        merchId: env.GAZPROM_MERCH_ID,
+        url: {
+            failedPayment: env.GAZPROM_FAILED_PAYMENT_URL,
+        },
     },
     atol: {
         login: env.ATOL_LOGIN,
@@ -98,5 +104,8 @@ export default {
     },
     recurrentPayments: {
         recordsPerTime: +env.RECURRENT_PAYMENTS_RECORDS_PER_TIME,
+    },
+    miscellaneous: {
+        mainUrl: env.MAIN_URL,
     },
 };

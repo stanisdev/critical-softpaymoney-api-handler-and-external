@@ -39,6 +39,7 @@ export enum DatabaseLogType {
     CannotCreateAtolCheck = 'cannot-create-atol-check',
     CannotGetReportAboutCheck = 'cannot-get-report-about-check',
     OrderStatusShouldBeEuqalCreated = 'order-status-should-be-euqal-created',
+    GazpromRecurringPaymentInitiationFailed = 'gazprom-recurring-payment-initiation-failed',
 }
 
 export enum PaymentTransactionType {

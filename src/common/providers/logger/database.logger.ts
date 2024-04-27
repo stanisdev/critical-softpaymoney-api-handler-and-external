@@ -22,7 +22,7 @@ export default class DatabaseLogger {
     async write(type: DatabaseLogType, payload: Dictionary): Promise<void> {
         const logRecord = {
             type,
-            payload: JSON.stringify(payload),
+            payload,
         };
         await logRepository
             .createQueryBuilder()

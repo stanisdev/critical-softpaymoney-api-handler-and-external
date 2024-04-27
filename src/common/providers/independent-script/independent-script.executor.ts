@@ -1,5 +1,5 @@
 import RegularLogger from '../logger/regular.logger';
-import { RecurrentPaymentsExecutor } from '../../scripts/recurrent-payments-executor';
+import { RecurrentPaymentsExecutor } from '../../scripts/recurrent-payments/recurrent-payments.executor';
 import { connectExternalDataStorages } from './independent-script.connections';
 
 async function execute(): Promise<void> {
