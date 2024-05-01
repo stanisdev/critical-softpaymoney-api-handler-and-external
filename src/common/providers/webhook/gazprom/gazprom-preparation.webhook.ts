@@ -12,7 +12,6 @@ import { WebhookFrame } from 'src/common/interfaces/general';
 import { incomingRequestRepository } from 'src/database/repositories';
 import { GazpromRepository } from './gazprom-preparation.repository';
 import { GazpromPreparationHelper } from './gazprom-preparation.helper';
-import config from 'src/common/config';
 
 export class GazpromPreparationWebhook implements WebhookFrame {
     private dataSource: GazpromDataSource;
@@ -40,7 +39,7 @@ export class GazpromPreparationWebhook implements WebhookFrame {
             <string>orderPaymentId,
         );
 
-        if (order.status !== OrderStatus.Created) {
+        if (order?.status !== OrderStatus.Created) {
             await this.helper.claimIncorrectOrderStatus(order._id);
         }
 
@@ -53,8 +52,34 @@ export class GazpromPreparationWebhook implements WebhookFrame {
                 'Order has incorrect "payment.amount" value',
             );
         }
+        /**
+         * Find product
+         */
         const product = await this.dataSource.findProductById(order.product);
-
+        if (!(product instanceof Object)) {
+            await this.helper.claimProductNotFound(order.product);
+        }
+        /**
+         * Find product owner
+         */
+        const productOwner = await this.dataSource.findProductOwnerById(
+            product.user,
+        );
+        if (!(productOwner instanceof Object)) {
+            await this.helper.claimProductOwnerNotFound(product.user);
+        }
+        /**
+         * Retrieve 'Gazprom AccountId' from product owner
+         */
+        const { gazpromAccountId } = productOwner;
+        if (
+            typeof gazpromAccountId !== 'string' ||
+            gazpromAccountId.length < 1
+        ) {
+            await this.helper.claimProductOwnerHasNoGazpromAccountId(
+                product.user,
+            );
+        }
         /**
          * Save 'trx_id' in 'order.payment.trxId'
          */
@@ -90,7 +115,12 @@ export class GazpromPreparationWebhook implements WebhookFrame {
                     { longDesc: payloadData.longDesc }, // "Проверка доступности платежа в магазине" - сделай поиск по документации
                     {
                         'account-amount': [
-                            { id: config.gazprom.accountId },
+                            /**
+                             * 'gazpromAccountId' - даннное значение задается в БД каждому владельцу продукта,
+                             * который оплачивается через Газпром. В сущности это 'account_id' (один из creadentials)
+                             * магазина, который был подключен в Газпроме.
+                             */
+                            { id: gazpromAccountId },
                             { amount: +payloadData.amount * 100 },
                             { currency: payloadData.currency },
                             { exponent: payloadData.exponent },

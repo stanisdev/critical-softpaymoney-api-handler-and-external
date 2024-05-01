@@ -40,6 +40,9 @@ export enum DatabaseLogType {
     CannotGetReportAboutCheck = 'cannot-get-report-about-check',
     OrderStatusShouldBeEuqalCreated = 'order-status-should-be-euqal-created',
     GazpromRecurringPaymentInitiationFailed = 'gazprom-recurring-payment-initiation-failed',
+    ProductNotFound = 'product-not-found',
+    ProductOwnerNotFound = 'product-owner-not-found',
+    ProductOwnerHasNoGazpromAccountId = 'product-owner-has-no-gazprom-account-id',
 }
 
 export enum PaymentTransactionType {
