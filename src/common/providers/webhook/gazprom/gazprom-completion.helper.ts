@@ -1,5 +1,8 @@
 import { ObjectId } from 'mongodb';
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+    BadRequestException,
+    InternalServerErrorException,
+} from '@nestjs/common';
 import { IncomingRequestEntity } from 'src/database/entities/incomingRequest.entity';
 import { Dictionary, MongoDocument } from 'src/common/types/general';
 import { typeOrmDataSource } from 'src/database/data-source';
@@ -176,5 +179,25 @@ export class GazpromCompletionHelper {
             );
         }
         return inputAmount;
+    }
+
+    /**
+     * Validate certificate content
+     */
+    async validateCertificateContent(
+        certificateContent: string,
+    ): Promise<void> {
+        if (
+            typeof certificateContent !== 'string' ||
+            certificateContent.length < 1
+        ) {
+            await GazpromCompletionHelper.databaseLogger.write(
+                DatabaseLogType.CertificateContentIsUnrecognizable,
+                {
+                    incomingRequestPayload: this.incomingRequest.payload,
+                },
+            );
+            throw new BadRequestException('Wrong request data');
+        }
     }
 }

@@ -44,11 +44,12 @@ export class GazpromCompletionWebhook implements WebhookFrame {
             cardPan = <string>payload['p.maskedPan'];
         }
 
-        /**
-         * @todo: refactor this way to get certificate content
-         */
+        const merchIdCredential = this.incomingRequest.payload['merch_id'];
         const certificateContent =
-            GazpromCertificates.getCertificateByName('test');
+            GazpromCertificates.getCertificateByName(merchIdCredential);
+
+        await this.helper.validateCertificateContent(certificateContent);
+
         /**
          * Signature verification.
          */

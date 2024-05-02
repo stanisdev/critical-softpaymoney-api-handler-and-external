@@ -17,6 +17,7 @@
     "start:prod:external": "NODE_ENV=production SERVER_TYPE=externalInteraction node dist/main",
     "execute:gazprom:recurrent:payments": "echo 'Error: define the command'",
     "execute:gazprom:recurrent:payments:dev": "NODE_ENV=development.local IS_INDEPENDENT_SCRIPT=true PAYMENT_SYSTEM=Gazprom SCRIPT_NAME=recurrent-payments-executor tsx watch --no-cache src/common/providers/independent-script/independent-script.executor.ts",
+    "aes256:encryption:dev": "NODE_ENV=development.local IS_INDEPENDENT_SCRIPT=true tsx watch --no-cache src/common/scripts/aes256Encryption.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

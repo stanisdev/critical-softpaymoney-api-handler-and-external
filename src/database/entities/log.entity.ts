@@ -18,9 +18,7 @@ export class LogEntity {
     @IsEnum(DatabaseLogType)
     type: DatabaseLogType;
 
-    @Column('jsonb', {
-        nullable: false,
-    })
+    @Column()
     payload: string;
 
     @CreateDateColumn()

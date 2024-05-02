@@ -8,33 +8,34 @@ export class GazpromCertificates {
 
     private static certificateToName = {
         /**
-         * todo: if it is possible move to the config
+         * field name includes 'merch_id' value - one of the Gazprom credentials
          */
-        test: 'gazprom-test.cer',
+        ['gazprom-A471B6C085183B83C051']:
+            'gazprom-test-merch-id-A471B6C085183B83C051.cer',
     };
 
-    static certificatesContent = {
-        test: '',
+    private static certificatesContent = {
+        ['gazprom-A471B6C085183B83C051']: '',
     };
 
     /**
-     * Load certificates from files
-     *
-     * @notice: this method should be edited to get various certificates
+     * Load certificates from files and fill the 'certificatesContent' variable
      */
     static loadAll(): void {
-        const filePath = join(
-            config.dirs.certificates,
-            this.certificateToName.test,
+        Object.entries(this.certificateToName).forEach(
+            ([certificateName, fileName]) => {
+                const filePath = join(config.dirs.certificates, fileName);
+                this.certificatesContent[certificateName] =
+                    this.loadCertificateFromFile(filePath);
+            },
         );
-        this.certificatesContent.test = this.loadCertificateFromFile(filePath);
     }
 
     /**
      * Get certificate content by name
      */
-    static getCertificateByName(certificateName: string): string {
-        return this.certificatesContent[certificateName];
+    static getCertificateByName(merchIdCredential: string): string {
+        return this.certificatesContent[`gazprom-${merchIdCredential}`];
     }
 
     /**

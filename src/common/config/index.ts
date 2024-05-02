@@ -108,4 +108,10 @@ export default {
     miscellaneous: {
         mainUrl: env.MAIN_URL,
     },
+    secret: {
+        aes256: {
+            key: env.ENCRYPTION_AES256_KEY,
+            initializationVector: env.ENCRYPTION_AES256_INITIALIZATION_VECTOR,
+        },
+    },
 };

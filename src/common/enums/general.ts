@@ -43,6 +43,7 @@ export enum DatabaseLogType {
     ProductNotFound = 'product-not-found',
     ProductOwnerNotFound = 'product-owner-not-found',
     ProductOwnerHasNoGazpromAccountId = 'product-owner-has-no-gazprom-account-id',
+    CertificateContentIsUnrecognizable = 'certificate-content-is-unrecognizable',
 }
 
 export enum PaymentTransactionType {
