@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import config from '../../common/config';
 
 const secretKey = config.secret.aes256.key;

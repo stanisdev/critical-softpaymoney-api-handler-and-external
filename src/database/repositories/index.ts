@@ -26,6 +26,6 @@ export const handlerPortRepository =
 export const recurrentPaymentsQueueRepository = typeOrmDataSource.getRepository(
     RecurrentPaymentsQueueEntity,
 );
-export const encryptedStorageEntityRepository = typeOrmDataSource.getRepository(
+export const encryptedStorageRepository = typeOrmDataSource.getRepository(
     EncryptedStorageEntity,
 );

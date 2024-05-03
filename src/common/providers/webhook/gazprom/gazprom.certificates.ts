@@ -1,53 +1,36 @@
-import { join } from 'node:path';
-import { readFileSync, statSync } from 'node:fs';
-import RegularLogger from '../../logger/regular.logger';
-import config from 'src/common/config';
+import { encryptedStorageRepository } from 'src/database/repositories';
+import { Dictionary } from 'src/common/types/general';
+import { Encryption } from '../../encryption';
 
 export class GazpromCertificates {
-    private static regularLogger = RegularLogger.getInstance();
-
-    private static certificateToName = {
-        /**
-         * field name includes 'merch_id' value - one of the Gazprom credentials
-         */
-        ['gazprom-A471B6C085183B83C051']:
-            'gazprom-test-merch-id-A471B6C085183B83C051.cer',
-    };
-
-    private static certificatesContent = {
-        ['gazprom-A471B6C085183B83C051']: '',
-    };
+    private static content: Dictionary = {};
 
     /**
-     * Load certificates from files and fill the 'certificatesContent' variable
+     * Load certificates from database
      */
-    static loadAll(): void {
-        Object.entries(this.certificateToName).forEach(
-            ([certificateName, fileName]) => {
-                const filePath = join(config.dirs.certificates, fileName);
-                this.certificatesContent[certificateName] =
-                    this.loadCertificateFromFile(filePath);
-            },
-        );
+    static async loadAll(): Promise<void> {
+        const records = await encryptedStorageRepository
+            .createQueryBuilder('es')
+            .select(['es.metadata', 'es.content'])
+            .where(`es.destination = 'Gazprom'`)
+            .getMany();
+
+        const encryptionProvider = new Encryption();
+
+        for (const record of records) {
+            const { metadata, content: encryptedContent } = record;
+            const merchId = metadata['merch_id'];
+            const decryptedContent =
+                encryptionProvider.aes256DecryptData(encryptedContent);
+
+            this.content[merchId] = decryptedContent;
+        }
     }
 
     /**
      * Get certificate content by name
      */
     static getCertificateByName(merchIdCredential: string): string {
-        return this.certificatesContent[`gazprom-${merchIdCredential}`];
-    }
-
-    /**
-     * Load certificate from file
-     */
-    private static loadCertificateFromFile(filePath: string): string {
-        try {
-            statSync(filePath);
-        } catch {
-            this.regularLogger.error(`Cannot read certificate: ${filePath}`);
-            process.exit(1);
-        }
-        return readFileSync(filePath, { encoding: 'utf-8' });
+        return <string>this.content[merchIdCredential];
     }
 }

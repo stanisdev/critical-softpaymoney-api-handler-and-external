@@ -57,11 +57,6 @@ export class GazpromCompletionWebhook implements WebhookFrame {
             this.incomingRequest,
             certificateContent,
         );
-        /**
-         * @todo
-         * @important
-         * UNCOMMENT THE LINE BELOW
-         */
         await gazpromSignatureVerification.verify();
 
         const orderPaymentId = payload['o.CustomerKey'];
