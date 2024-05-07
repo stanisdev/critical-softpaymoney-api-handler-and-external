@@ -1,6 +1,7 @@
 import { DatabaseLogType } from 'src/common/enums/general';
 import { Dictionary } from 'src/common/types/general';
-import { logRepository } from 'src/database/repositories';
+// import { logRepository } from 'src/database/repositories';
+import { OpenSearchClient } from '../open-search-client';
 
 export default class DatabaseLogger {
     private static instance: DatabaseLogger | null = null;
@@ -22,12 +23,21 @@ export default class DatabaseLogger {
     async write(type: DatabaseLogType, payload: Dictionary): Promise<void> {
         const logRecord = {
             type,
-            payload: JSON.stringify(payload),
+            payload,
         };
-        await logRepository
-            .createQueryBuilder()
-            .insert()
-            .values(logRecord)
-            .execute();
+        await OpenSearchClient.insertDocument(logRecord);
+
+        /**
+         * Let's remain for the local debugging purposes
+         */
+        // const logRecord = {
+        //     type,
+        //     payload: JSON.stringify(payload),
+        // };
+        // await logRepository
+        //     .createQueryBuilder()
+        //     .insert()
+        //     .values(logRecord)
+        //     .execute();
     }
 }

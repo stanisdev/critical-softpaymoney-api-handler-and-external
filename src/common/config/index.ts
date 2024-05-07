@@ -114,4 +114,10 @@ export default {
             initializationVector: env.ENCRYPTION_AES256_INITIALIZATION_VECTOR,
         },
     },
+    openSearch: {
+        index: env.OPENSEARCH_INDEX,
+        username: env.OPENSEARCH_USERNAME,
+        password: env.OPENSEARCH_PASSWORD,
+        node: 'https://localhost:9200', // @todo: move to '.env' file
+    },
 };

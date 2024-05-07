@@ -1,5 +1,5 @@
 import DatabaseLogger from '../../logger/database.logger';
-import { MongoClient } from '../../mongoClient';
+import { MongoClient } from '../../mongo-client';
 import { ObjectId } from 'mongodb';
 import { DatabaseLogType } from 'src/common/enums/general';
 import { InternalServerErrorException } from '@nestjs/common';

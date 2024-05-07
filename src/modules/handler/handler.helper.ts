@@ -4,7 +4,7 @@ import {
     Injectable,
     InternalServerErrorException,
 } from '@nestjs/common';
-import { HttpClient } from 'src/common/providers/httpClient';
+import { HttpClient } from 'src/common/providers/http-client';
 import { Dictionary } from 'src/common/types/general';
 import DatabaseLogger from 'src/common/providers/logger/database.logger';
 import config from 'src/common/config';

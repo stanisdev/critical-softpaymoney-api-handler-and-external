@@ -6,9 +6,9 @@ import {
 import HTTPMethod from 'http-method-enum';
 import config from 'src/common/config';
 import { HttpStatus } from '@nestjs/common';
-import { MongoClient } from 'src/common/providers/mongoClient';
+import { MongoClient } from 'src/common/providers/mongo-client';
 import { GeneralUtil } from 'src/common/utils/general.util';
-import { HttpClient } from '../httpClient';
+import { HttpClient } from '../http-client';
 import { ExternalInteractionDataSource } from 'src/modules/external-interaction/external-interaction.data-source';
 
 export class MerchantWebhookInteraction {

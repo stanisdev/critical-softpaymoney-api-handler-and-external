@@ -12,11 +12,12 @@ import { AppModule } from './modules/app.module';
 import { typeOrmDataSource } from 'src/database/data-source';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { GeneralUtil } from './common/utils/general.util';
-import { MongoClient } from './common/providers/mongoClient';
+import { MongoClient } from './common/providers/mongo-client';
 import { ServerType } from './common/enums/general';
 import { handlerPortRepository } from './database/repositories';
 import { HandlerPortEntity } from './database/entities/handlerPort.entity';
 import { GazpromCertificates } from './common/providers/webhook/gazprom/gazprom.certificates';
+import { OpenSearchClient } from './common/providers/open-search-client';
 
 export class ServerBootstrap {
     private static instance: ServerBootstrap | null = null;
@@ -43,6 +44,9 @@ export class ServerBootstrap {
     async start(): Promise<void> {
         await this.connectPostgres();
         await this.connectMongo();
+
+        OpenSearchClient.build();
+        await OpenSearchClient.connect();
 
         await GazpromCertificates.loadAll();
 

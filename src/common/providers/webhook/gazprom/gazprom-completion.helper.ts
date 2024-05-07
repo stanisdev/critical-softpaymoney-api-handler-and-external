@@ -15,7 +15,7 @@ import DatabaseLogger from '../../logger/database.logger';
 import { PaymentTransactionEntity } from 'src/database/entities/paymentTransaction.entity';
 import { OrderEntity } from 'src/database/entities/order.entity';
 import { MathUtil } from 'src/common/utils/math.util';
-import { MongoClient } from '../../mongoClient';
+import { MongoClient } from '../../mongo-client';
 
 export class GazpromCompletionHelper {
     private static databaseLogger = DatabaseLogger.getInstance();

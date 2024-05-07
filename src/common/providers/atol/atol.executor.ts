@@ -1,7 +1,7 @@
 import { ExternalInteractionDataSource } from 'src/modules/external-interaction/external-interaction.data-source';
 import { OrderStatus, PaymentSystem } from 'src/common/enums/general';
 import { AtolClient } from './atol.client';
-import { MongoClient } from '../mongoClient';
+import { MongoClient } from '../mongo-client';
 
 export class AtolExecutor {
     private mongoClient = MongoClient.getInstance().database;

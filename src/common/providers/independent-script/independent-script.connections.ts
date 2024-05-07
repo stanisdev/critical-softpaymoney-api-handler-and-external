@@ -1,5 +1,5 @@
 import { typeOrmDataSource } from '../../../database/data-source';
-import { MongoClient } from '../mongoClient';
+import { MongoClient } from '../mongo-client';
 import RegularLogger from '../logger/regular.logger';
 
 export async function connectExternalDataStorages() {

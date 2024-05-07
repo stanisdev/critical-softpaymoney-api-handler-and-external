@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { MongoClient } from 'src/common/providers/mongoClient';
+import { MongoClient } from 'src/common/providers/mongo-client';
 import {
     ExternalInteractionPayload,
     MongoDocument,

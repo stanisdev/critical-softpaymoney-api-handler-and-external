@@ -1,4 +1,4 @@
-import { MongoClient } from '../../mongoClient';
+import { MongoClient } from '../../mongo-client';
 import { ObjectId } from 'mongodb';
 
 export class GazpromRepository {

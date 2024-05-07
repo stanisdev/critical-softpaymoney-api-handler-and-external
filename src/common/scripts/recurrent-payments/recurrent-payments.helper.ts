@@ -5,14 +5,14 @@ import DatabaseLogger from 'src/common/providers/logger/database.logger';
 import { stringify as querystringStringify } from 'node:querystring';
 import { ObjectId } from 'mongodb';
 import { recurrentPaymentsQueueRepository } from '../../../database/repositories';
-import { MongoClient } from '../../providers/mongoClient';
+import { MongoClient } from '../../providers/mongo-client';
 import {
     DatabaseLogType,
     OrderStatus,
     PaymentSystem,
 } from '../../enums/general';
 import { Dictionary, MongoDocument } from '../../types/general';
-import { HttpClient } from '../../providers/httpClient';
+import { HttpClient } from '../../providers/http-client';
 import { RecurrentPaymentsQueueEntity } from 'src/database/entities/recurrentPaymentsQueue.entity';
 
 export class RecurrentPaymentsHelper {
