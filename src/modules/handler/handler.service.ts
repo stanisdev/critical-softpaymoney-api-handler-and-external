@@ -28,7 +28,7 @@ export class HandlerService {
             .getOne();
 
         if (!(incomingRequest instanceof IncomingRequestEntity)) {
-            this.helper.claimIncomingRequestNotFound(incomingRequestId);
+            await this.helper.claimIncomingRequestNotFound(incomingRequestId);
         }
 
         /**
