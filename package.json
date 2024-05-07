@@ -14,6 +14,7 @@
     "start:dev:external": "NODE_ENV=development.local SERVER_TYPE=externalInteraction nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod:handler": "NODE_ENV=production SERVER_TYPE=handler node dist/main",
+    "start:prod:local:handler": "NODE_ENV=production.local SERVER_TYPE=handler node dist/main",
     "start:prod:external": "NODE_ENV=production SERVER_TYPE=externalInteraction node dist/main",
     "execute:gazprom:recurrent:payments": "echo 'Error: define the command'",
     "execute:gazprom:recurrent:payments:dev": "NODE_ENV=development.local IS_INDEPENDENT_SCRIPT=true PAYMENT_SYSTEM=Gazprom SCRIPT_NAME=recurrent-payments-executor tsx watch --no-cache src/common/providers/independent-script/independent-script.executor.ts",
