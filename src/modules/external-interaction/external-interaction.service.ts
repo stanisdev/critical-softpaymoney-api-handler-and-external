@@ -4,6 +4,7 @@ import { ExternalInteractionHelper } from './external-interaction.helper';
 import { ExternalInteractionDataSource } from './external-interaction.data-source';
 import { AtolExecutor } from 'src/common/providers/atol/atol.executor';
 import { GetCourseExecutor } from 'src/common/providers/getCourse/get-course.executor';
+import { MerchantWebhookInteraction } from 'src/common/providers/external-interactions/merchant-webhook.interaction';
 
 @Injectable()
 export class ExternalInteractionService {
@@ -20,11 +21,11 @@ export class ExternalInteractionService {
         const dataSource = new ExternalInteractionDataSource(payload);
         await dataSource.load();
 
-        /**
-         * @todo: uncomment 2 lines below
-         */
-        // const merchantWebhook = new MerchantWebhookInteraction(payload, dataSource);
-        // await merchantWebhook.execute();
+        const merchantWebhook = new MerchantWebhookInteraction(
+            payload,
+            dataSource,
+        );
+        await merchantWebhook.execute();
 
         const atolExecutor = new AtolExecutor(dataSource);
         atolExecutor.run();
